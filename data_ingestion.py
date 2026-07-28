@@ -21,6 +21,8 @@ def main():
             print(df.dtypes)
             print("Head:")
             print(df.head())
+            print("Missing values by column:")
+            print(df.isnull().sum())
         except Exception as exc:
             print(f"Failed to read {csv_path}: {exc}")
 
