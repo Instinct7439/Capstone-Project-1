@@ -23,6 +23,20 @@ def main():
             print(df.head())
             print("Missing values by column:")
             print(df.isnull().sum())
+
+            # Anomaly detection: report duplicate rows and summary statistics
+            try:
+                dup_count = int(df.duplicated().sum())
+                print(f"Total duplicate rows: {dup_count}")
+            except Exception as e:
+                print(f"Failed to compute duplicate rows: {e}")
+
+            print("Summary statistics (describe):")
+            try:
+                # include='all' to show stats for non-numeric columns as well
+                print(df.describe(include='all'))
+            except Exception as e:
+                print(f"Failed to produce describe(): {e}")
         except Exception as exc:
             print(f"Failed to read {csv_path}: {exc}")
 
