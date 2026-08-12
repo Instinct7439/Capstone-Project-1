@@ -1,3 +1,10 @@
+"""
+Data Cleaning Module
+
+Performs data transformation, data type coercion, standardizing transaction and 
+KYC categories, forward-filling missing NAV values, and saving cleaned datasets to data/processed/.
+"""
+
 import os
 import shutil
 from pathlib import Path
@@ -42,7 +49,16 @@ KYC_STATUS_MAP = {
 }
 
 
-def standardize_transaction_type(raw_value):
+def standardize_transaction_type(raw_value: str) -> str:
+    """
+    Standardizes transaction type labels into canonical categories: SIP, Lumpsum, Redemption.
+
+    Parameters:
+        raw_value (str): Uncleaned transaction type string.
+
+    Returns:
+        str: Standardized transaction type category or 'Unknown'.
+    """
     if pd.isna(raw_value):
         return "Unknown"
     normalized = str(raw_value).strip().lower()
@@ -58,7 +74,16 @@ def standardize_transaction_type(raw_value):
     return "Unknown"
 
 
-def standardize_kyc_status(raw_value):
+def standardize_kyc_status(raw_value: str) -> str:
+    """
+    Standardizes KYC status string values into clean status categories.
+
+    Parameters:
+        raw_value (str): Uncleaned KYC status value.
+
+    Returns:
+        str: Standardized status string or 'Unknown'.
+    """
     if pd.isna(raw_value):
         return "Unknown"
     normalized = str(raw_value).strip().lower()
@@ -66,7 +91,19 @@ def standardize_kyc_status(raw_value):
     return KYC_STATUS_MAP.get(normalized, "Unknown")
 
 
-def clean_nav_history(source_path, dest_path):
+
+def clean_nav_history(source_path: Path, dest_path: Path) -> pd.DataFrame:
+    """
+    Cleans daily NAV history datasets by sorting by date, removing duplicate entries, 
+    forward-filling missing NAV values, and filtering non-positive NAV numbers.
+
+    Parameters:
+        source_path (Path): Path to raw NAV history CSV file.
+        dest_path (Path): Destination path for processed CSV output.
+
+    Returns:
+        pd.DataFrame: Cleaned NAV history DataFrame.
+    """
     print(f"Cleaning NAV history: {source_path.name}")
     df = pd.read_csv(source_path)
 
@@ -101,7 +138,18 @@ def clean_nav_history(source_path, dest_path):
     return df
 
 
-def clean_investor_transactions(source_path, dest_path):
+def clean_investor_transactions(source_path: Path, dest_path: Path) -> pd.DataFrame:
+    """
+    Cleans investor transaction records, standardizing transaction types, 
+    verifying positive transaction amounts, and parsing KYC status.
+
+    Parameters:
+        source_path (Path): Path to raw investor transactions CSV file.
+        dest_path (Path): Destination path for processed CSV output.
+
+    Returns:
+        pd.DataFrame: Cleaned investor transactions DataFrame.
+    """
     print(f"Cleaning investor transactions: {source_path.name}")
     df = pd.read_csv(source_path)
 
@@ -135,7 +183,18 @@ def clean_investor_transactions(source_path, dest_path):
     return df
 
 
-def clean_scheme_performance(source_path, dest_path):
+def clean_scheme_performance(source_path: Path, dest_path: Path) -> pd.DataFrame:
+    """
+    Validates and cleans mutual fund scheme performance metrics, flagging out-of-range 
+    expense ratios and numeric CAGR metrics.
+
+    Parameters:
+        source_path (Path): Path to raw scheme performance CSV file.
+        dest_path (Path): Destination path for processed CSV output.
+
+    Returns:
+        pd.DataFrame: Cleaned scheme performance DataFrame.
+    """
     print(f"Cleaning scheme performance: {source_path.name}")
     df = pd.read_csv(source_path)
 
@@ -169,13 +228,23 @@ def clean_scheme_performance(source_path, dest_path):
     return df
 
 
-def copy_raw_file(source_path, dest_path):
+def copy_raw_file(source_path: Path, dest_path: Path) -> None:
+    """
+    Copies verified raw CSV files directly to the data/processed directory.
+
+    Parameters:
+        source_path (Path): Source raw file path.
+        dest_path (Path): Destination processed file path.
+    """
     print(f"Copying raw dataset: {source_path.name}")
     shutil.copy2(source_path, dest_path)
     print(f"  Copied {source_path.name} to processed folder")
 
 
-def main():
+def main() -> None:
+    """
+    Executes data cleaning pipeline across all raw CSV files in data/raw/.
+    """
     try:
         PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
         print(f"Processing files from {RAW_DIR} to {PROCESSED_DIR}")
@@ -207,3 +276,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

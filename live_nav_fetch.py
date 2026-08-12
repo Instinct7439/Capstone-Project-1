@@ -1,3 +1,10 @@
+"""
+Live NAV Fetcher Module
+
+Fetches real-time mutual fund NAV history data from the public RapidAPI/MF API endpoint 
+and saves scheme-specific NAV CSV files to data/raw/.
+"""
+
 import os
 import time
 import requests
@@ -10,7 +17,16 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "data", "raw")
 DELAY_SECONDS = 1.0
 
 
-def fetch_nav_data(scheme_code):
+def fetch_nav_data(scheme_code: int) -> list:
+    """
+    Fetches raw NAV JSON history records for a given AMFI scheme code via HTTP GET.
+
+    Parameters:
+        scheme_code (int): AMFI mutual fund scheme identifier.
+
+    Returns:
+        list: List of daily NAV dictionaries containing date and nav fields.
+    """
     url = BASE_URL.format(scheme_code=scheme_code)
     response = requests.get(url, timeout=10)
     response.raise_for_status()
@@ -20,14 +36,27 @@ def fetch_nav_data(scheme_code):
     return payload["data"]
 
 
-def save_nav_csv(scheme_code, data_rows):
+def save_nav_csv(scheme_code: int, data_rows: list) -> str:
+    """
+    Saves fetched NAV history records as a CSV dataset in data/raw/.
+
+    Parameters:
+        scheme_code (int): AMFI scheme code.
+        data_rows (list): List of NAV record dicts.
+
+    Returns:
+        str: Saved output file path.
+    """
     df = pd.DataFrame(data_rows)
     output_path = os.path.join(OUTPUT_DIR, f"nav_{scheme_code}.csv")
     df.to_csv(output_path, index=False)
     return output_path
 
 
-def main():
+def main() -> None:
+    """
+    Iterates over target AMFI scheme codes to fetch and store live NAV histories.
+    """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     for scheme_code in SCHEME_CODES:
@@ -47,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

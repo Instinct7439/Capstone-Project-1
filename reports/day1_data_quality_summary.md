@@ -11,4 +11,4 @@
 ## Notes
 
 - Validation passed: AMFI codes are consistent between fund_master and nav_history.
-- Review the unique category and risk labels printed above to understand the scheme structure.
+- Review unique category and risk labels printed above.

@@ -1,3 +1,11 @@
+"""
+Database Loader Module
+
+Reads processed CSV files from data/processed/, builds a SQLite relational star schema 
+(bluestock_mf.db), populates dimension tables (dim_fund, dim_date) and fact tables 
+(fact_nav, fact_performance, fact_transactions).
+"""
+
 import os
 from pathlib import Path
 
@@ -69,7 +77,13 @@ DATE_COLUMNS_TO_SCAN = [
 ]
 
 
-def load_schema(engine):
+def load_schema(engine) -> None:
+    """
+    Executes the DDL schema SQL script against the SQLite database engine.
+
+    Parameters:
+        engine (Engine): SQLAlchemy database engine connection.
+    """
     if not SCHEMA_PATH.exists():
         raise FileNotFoundError(f"Schema file not found: {SCHEMA_PATH}")
 
@@ -81,6 +95,16 @@ def load_schema(engine):
 
 
 def clean_table_columns(table_name: str, df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Filters DataFrame columns to strictly match expected SQLite star schema columns.
+
+    Parameters:
+        table_name (str): Target table name.
+        df (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        pd.DataFrame: Cleaned DataFrame with aligned schema columns.
+    """
     expected_columns = STAR_SCHEMA_COLUMNS.get(table_name)
     if not expected_columns:
         return df
@@ -96,7 +120,16 @@ def clean_table_columns(table_name: str, df: pd.DataFrame) -> pd.DataFrame:
     return df[available_columns]
 
 
-def build_dim_date(engine):
+def build_dim_date(engine) -> int:
+    """
+    Scans processed dataset CSV files for date fields and populates the dim_date table.
+
+    Parameters:
+        engine (Engine): SQLAlchemy database engine connection.
+
+    Returns:
+        int: Count of inserted date dimension records.
+    """
     print("Building dim_date from processed CSV date columns")
     all_dates = set()
     for csv_path in sorted(PROCESSED_DIR.glob("*.csv")):
@@ -106,6 +139,7 @@ def build_dim_date(engine):
                 parsed = pd.to_datetime(df[date_col], errors="coerce")
                 formatted = parsed.dt.strftime("%Y-%m-%d").dropna().unique()
                 all_dates.update(formatted)
+
 
     date_rows = []
     for date_value in sorted(all_dates):
@@ -138,7 +172,18 @@ def build_dim_date(engine):
     return len(date_df)
 
 
-def load_csv_to_table(engine, csv_path: Path, table_name: str):
+def load_csv_to_table(engine, csv_path: Path, table_name: str) -> int:
+    """
+    Reads a processed CSV file and writes its contents into the corresponding SQLite database table.
+
+    Parameters:
+        engine (Engine): SQLAlchemy database engine connection.
+        csv_path (Path): Path to the processed CSV file.
+        table_name (str): Target SQLite table name.
+
+    Returns:
+        int: Number of rows inserted into the table.
+    """
     print(f"Loading {csv_path.name} into table {table_name}")
     df = pd.read_csv(csv_path)
     if table_name in STAR_SCHEMA_COLUMNS:
@@ -154,7 +199,10 @@ def load_csv_to_table(engine, csv_path: Path, table_name: str):
     return len(df)
 
 
-def main():
+def main() -> None:
+    """
+    Orchestrates SQLite database creation, schema loading, and data insertion from data/processed/.
+    """
     if DB_PATH.exists():
         DB_PATH.unlink()
         print(f"Removed existing database at {DB_PATH}")
@@ -185,10 +233,11 @@ def main():
         for table_name, source_count in table_counts.items():
             result = conn.execute(text(f"SELECT COUNT(*) AS row_count FROM \"{table_name}\""))
             row_count = result.scalar_one()
-            print(f"{table_name}: database={row_count}, source_csv={source_count}")
+            print(f"  {table_name}: database={row_count}, source_csv={source_count}")
 
     print("DB load complete.")
 
 
 if __name__ == "__main__":
     main()
+
