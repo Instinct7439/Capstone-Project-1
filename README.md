@@ -19,7 +19,7 @@ The **Mutual Fund Analytics Capstone Project** delivers an end-to-end quantitati
 * **Portfolio Concentration**: Sector Herfindahl-Hirschman Index (HHI) concentration modeling ($\sum w_s^2$) to flag high single-sector exposure.
 * **Investor Behavioral Intelligence**: Cohort analysis by investor acquisition year and SIP continuity tracking (flagging `at-risk` accounts with $>35$ day installment gaps).
 * **Composite Ranking Engine**: Multi-factor 0–100 percentile composite scorecard incorporating CAGR, risk-adjusted ratios, drawdown recovery, and expense ratios.
-* **Automated Master ETL Pipeline**: One-command execution (`python run_pipeline.py`) spanning ingestion, cleaning, validation, database loading, and reporting.
+* **Automated Master ETL Pipeline**: One-command execution (`python scripts/etl_pipeline.py`) spanning ingestion, cleaning, validation, database loading, and reporting.
 
 ---
 
@@ -77,22 +77,22 @@ The platform processes datasets covering 40 mutual fund schemes across Equity, D
 Run the master automated pipeline script to execute ingestion, cleaning, validation, database loading, quantitative analytics, and recommendation reporting in sequence:
 
 ```bash
-python run_pipeline.py
+python scripts/etl_pipeline.py
 ```
 
 #### Pipeline Steps Triggered:
-1. **`data_ingestion.py`**: Scans raw datasets in `data/raw/` and inspects schemas.
-2. **`data_cleaning.py`**: Standardizes categories, handles null NAVs, and exports to `data/processed/`.
-3. **`validate_data.py`**: Validates AMFI codes and writes `reports/day1_data_quality_summary.md`.
-4. **`db_loader.py`**: Builds `bluestock_mf.db` (SQLite Star Schema) and populates dimensions/facts.
-5. **`calculate_rolling_sharpe.py`**: Generates 90-day rolling Sharpe time series plot (`rolling_sharpe_chart.png`).
-6. **`recommender.py`**: Runs mutual fund recommendation engine across risk grades.
+1. **`scripts/data_ingestion.py`**: Scans raw datasets in `data/raw/` and inspects schemas.
+2. **`scripts/data_cleaning.py`**: Standardizes categories, handles null NAVs, and exports to `data/processed/`.
+3. **`scripts/validate_data.py`**: Validates AMFI codes and writes `reports/day1_data_quality_summary.md`.
+4. **`scripts/db_loader.py`**: Builds `data/db/bluestock_mf.db` (SQLite Star Schema) and populates dimensions/facts.
+5. **`scripts/calculate_rolling_sharpe.py`**: Generates 90-day rolling Sharpe time series plot (`rolling_sharpe_chart.png`).
+6. **`scripts/recommender.py`**: Runs mutual fund recommendation engine across risk grades.
 
 ### Individual Script & Notebook Execution
 
 - **Mutual Fund Recommender**:
   ```bash
-  python recommender.py
+  python scripts/recommender.py
   ```
 
 - **Jupyter Analytics Notebooks**:
@@ -109,19 +109,21 @@ python run_pipeline.py
 ### Power BI Interactive Dashboard
 1. Open **Microsoft Power BI Desktop**.
 2. Navigate to `dashboard/` and open **`Bluestock_Mutual_Fund_Dashboard.pbix`**.
-3. If prompted for data connection, point the SQLite database connector to `bluestock_mf.db`.
+3. If prompted for data connection, point the SQLite database connector to `data/db/bluestock_mf.db`.
 
-### Exported Charts & Reports
+### Exported Charts, Reports & Presentations
+- **Executive Presentation**: [`reports/Presentation.pptx`](file:///d:/D%20Drive/Capstone%20Project%201/reports/Presentation.pptx) (12 Widescreen Presentation Slides)
+- **Final Comprehensive Report**: [`reports/Final_Report.pdf`](file:///d:/D%20Drive/Capstone%20Project%201/reports/Final_Report.pdf) & [`reports/Final_Report_Draft.md`](file:///d:/D%20Drive/Capstone%20Project%201/reports/Final_Report_Draft.md)
 - **Exported High-Res Visualizations**: Located in `dashboard/exported_charts/`
   - `rolling_sharpe_chart.png` (90-Day Rolling Sharpe Time Series)
   - `benchmark_comparison.png` (3-Year Cumulative Returns vs. Nifty 100)
 - **Data Quality Summary**: [`reports/day1_data_quality_summary.md`](file:///d:/D%20Drive/Capstone%20Project%201/reports/day1_data_quality_summary.md)
-- **Composite Fund Scorecard**: [`fund_scorecard.csv`](file:///d:/D%20Drive/Capstone%20Project%201/fund_scorecard.csv)
-- **CAPM Alpha & Beta Summary**: [`alpha_beta.csv`](file:///d:/D%20Drive/Capstone%20Project%201/alpha_beta.csv)
+- **Composite Fund Scorecard**: [`data/processed/fund_scorecard.csv`](file:///d:/D%20Drive/Capstone%20Project%201/data/processed/fund_scorecard.csv)
+- **CAPM Alpha & Beta Summary**: [`data/processed/alpha_beta.csv`](file:///d:/D%20Drive/Capstone%20Project%201/data/processed/alpha_beta.csv)
 
 ---
 
 ## License & Author
 - **Project**: Mutual Fund Analytics Capstone
-- **Author**: Capstone Data Science Team
+- **Author**: Vipin Nishad (Capstone Data Science Team)
 - **License**: MIT License
