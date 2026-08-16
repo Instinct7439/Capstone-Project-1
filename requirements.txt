@@ -7,3 +7,5 @@ sqlalchemy
 requests
 jupyter
 scipy
+streamlit
+python-dotenv
